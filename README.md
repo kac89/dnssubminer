@@ -1,5 +1,5 @@
 # dnssubminer
-Python DNS (http://www.dnspython.org/) resolver based subdomain brute force miner base on dictionary.
+Python DNS (http://www.dnspython.org/) resolver subdomain, brute force miner base on dictionary.
 
 ## Installation
 **Requires python module http://www.dnspython.org/**
