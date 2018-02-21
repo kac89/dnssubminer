@@ -1,11 +1,40 @@
-import sys
 import dns.resolver
+import socket
+import sys
 
+def portcheck(ip):
+    openports = []
+    ports = [22, 23, 53, 80, 443, 8080, 3389]
+    for port in ports:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(2)
+            result = s.connect_ex((ip, port))
+            if result == 0:
+                openports.append(port)
+            s.close()
+        except:
+            pass
+    if not openports:
+        openports = ""
+    return openports
+
+def lookup(addr):
+    try:
+        return socket.gethostbyaddr(addr)
+    except socket.herror:
+        return None, None, None
+    
 def whatisthere(subdomain,ip,target):
-    print subdomain + ": " + str(ip)
+    hostname,alias,addresslist = lookup(ip)
+    openportslist = portcheck(ip)
+    separator = "-"
+    if not openportslist:
+        separator = ""
+    print subdomain + ": " + ip + " - " + hostname + " "+separator+" " + str(openportslist)
     #do results backup
     file = open("results/"+target+"_results.txt", "ab")
-    file.write(subdomain + ": " + str(ip) + "\n")     
+    file.write(subdomain + ": " + ip + "\n")     
     file.close()
     ####
     pass
@@ -30,7 +59,7 @@ def main():
         sys.exit(0)
 
     resolver = dns.resolver.Resolver(configure=False)
-    #google dns & yandex dns public nameservers
+    #google dns & yandex dns public nameservers for balance in the galaxy
     resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
     print "\nSubdomain bruteforce results for " + target + ": \n"
     with open('dictionary.txt') as fp:
@@ -39,7 +68,7 @@ def main():
             try:
                 answer = resolver.query(chhost, 'A')
                 for a in answer:
-                    whatisthere(chhost,a,target)
+                    whatisthere(chhost,str(a),target)
 
             except dns.resolver.NXDOMAIN:
                 #print "No such domain %s" % chhost
