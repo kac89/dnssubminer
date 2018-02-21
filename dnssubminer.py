@@ -4,7 +4,7 @@ import sys
 
 def portcheck(ip):
     openports = []
-    ports = [22, 23, 53, 80, 443, 8080, 3389]
+    ports = [22, 53, 80, 443, 445, 8080, 3389, 9200]
     for port in ports:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
