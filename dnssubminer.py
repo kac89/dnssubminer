@@ -31,10 +31,10 @@ def whatisthere(subdomain,ip,target):
     separator = "-"
     if not openportslist:
         separator = ""
-    print subdomain + ": " + ip + " - " + hostname + " "+separator+" " + str(openportslist)
+    print subdomain + ": " + ip + " - " + hostname + " " + str(openportslist)
     #do results backup
     file = open("results/"+target+"_results.txt", "ab")
-    file.write(subdomain + ": " + ip + " - " + hostname + " "+separator+" " + str(openportslist) + "\n")     
+    file.write(subdomain + ": " + ip + " - " + hostname + " " + str(openportslist) + "\n")     
     file.close()
     ####
     pass
