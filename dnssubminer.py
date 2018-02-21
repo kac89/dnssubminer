@@ -30,8 +30,8 @@ def main():
         sys.exit(0)
 
     resolver = dns.resolver.Resolver(configure=False)
+    #google dns & yandex dns public nameservers
     resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
-
     print "\nSubdomain bruteforce results for " + target + ": \n"
     with open('dictionary.txt') as fp:
         for line in fp:
