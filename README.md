@@ -2,7 +2,7 @@
 Python DNS (http://www.dnspython.org/) resolver based subdomain brute force miner base on dictionary.
 
 ## Installation
-**requires python module http://www.dnspython.org/**
+**Requires python module http://www.dnspython.org/**
 
 OSX:
 
