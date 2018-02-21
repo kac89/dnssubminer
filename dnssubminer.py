@@ -23,7 +23,7 @@ def lookup(addr):
     try:
         return socket.gethostbyaddr(addr)
     except socket.herror:
-        return None, None, None
+        return "", None, None
     
 def whatisthere(subdomain,ip,target):
     hostname,alias,addresslist = lookup(ip)
@@ -33,7 +33,7 @@ def whatisthere(subdomain,ip,target):
         separator = ""
     print str(subdomain) + ": " + str(ip) + " - " + str(hostname) + " " + str(openportslist)
     #do results backup
-    file = open("results/"+target+"_results.txt", "ab")
+    file = open("results/"+target+"_results.txt", "a+")
     file.write(str(subdomain) + ": " + str(ip) + " - " + str(hostname) + " " + str(openportslist) + "\n")     
     file.close()
     ####
@@ -48,6 +48,10 @@ def main():
      | __ / _` | / / || || |  / /| / _ \ '  \ 
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
+@kacperybczynski
+
+#Legend:
+{subdomain}: {subdomain ip} - {subdomain ip hostname} [subdomain ip open ports]
 
         """    
 
