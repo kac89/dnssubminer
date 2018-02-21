@@ -1,10 +1,28 @@
 # dnssubminer
 Python DNS (http://www.dnspython.org/) resolver based subdomain brute force miner base on dictionary.
 
-How to start?
+## Installation
+**requires python module http://www.dnspython.org/**
 
-1. Install python module http://www.dnspython.org/
+##OSX:
 
-How to run?
+```
+git clone https://github.com/rthalley/dnspython
+cd dnspython/
+python setup.py install
+```
 
+
+
+## Other:
+```
+pip install dnspython
+```
+
+## How to run?
+
+```
 python dnssubminer.py google.com
+```
+
+
