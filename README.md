@@ -4,7 +4,7 @@ Python DNS (http://www.dnspython.org/) resolver based subdomain brute force mine
 ## Installation
 **requires python module http://www.dnspython.org/**
 
-##OSX:
+OSX:
 
 ```
 git clone https://github.com/rthalley/dnspython
@@ -12,9 +12,7 @@ cd dnspython/
 python setup.py install
 ```
 
-
-
-## Other:
+Other:
 ```
 pip install dnspython
 ```
