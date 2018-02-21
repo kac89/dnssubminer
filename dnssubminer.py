@@ -12,7 +12,7 @@ def whatisthere(subdomain,ip,target):
     
 def main():   
     
-    banner = """
+    print """
 
       _  _      _         _   _____           
      | || |__ _| |___  _ (_) |_  (_)___ _ __  
@@ -21,7 +21,7 @@ def main():
                        |__/                   
 
         """    
-    print banner
+
     if len(sys.argv) > 1:
         target = sys.argv[1]
     else:
