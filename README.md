@@ -23,4 +23,12 @@ pip install dnspython
 python dnssubminer.py google.com
 ```
 
+Specify port scan
+```
+python dnssubminer.py google.com -p 80,443,9200
+```
 
+Specify port scan and change default wordlist
+```
+python dnssubminer.py google.com -p 80,443,9200 -w /home/user/wordlist.txt
+```
