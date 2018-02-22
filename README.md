@@ -20,17 +20,17 @@ pip install dnspython
 ## How to run?
 
 ```
-python dnssubminer.py google.com
+python dnssubminer.py domain.com
 ```
 
 Specify port scan
 ```
-python dnssubminer.py google.com -p 80,443,9200
+python dnssubminer.py domain.com -p 80,443,9200
 ```
 
 Specify port scan and change default wordlist
 ```
-python dnssubminer.py google.com -p 80,443,9200 -w /home/user/wordlist.txt
+python dnssubminer.py domain.com -p 80,443,9200 -w /home/user/wordlist.txt
 ```
 
 Options
