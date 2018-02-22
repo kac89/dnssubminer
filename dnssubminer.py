@@ -1,10 +1,21 @@
+#!/usr/bin/env python
+
+from optparse import OptionParser
 import dns.resolver
 import socket
 import sys
 
-def portcheck(ip):
+def portcheck(ip,usescan):
     openports = []
-    ports = [22, 53, 80, 443, 445, 8080, 3389, 9200]
+    
+    ports = []
+    
+    if usescan:
+        #print usescan
+        new = usescan.split(",")
+        for i in new:
+            ports.append(int(i))
+
     for port in ports:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,8 +26,10 @@ def portcheck(ip):
             s.close()
         except:
             pass
+        
     if not openports:
         openports = ""
+        
     return openports
 
 def lookup(addr):
@@ -25,9 +38,9 @@ def lookup(addr):
     except socket.herror:
         return "", None, None
     
-def whatisthere(subdomain,ip,target):
+def whatisthere(subdomain,ip,target,usescan):
     hostname,alias,addresslist = lookup(ip)
-    openportslist = portcheck(ip)
+    openportslist = portcheck(ip,usescan)
     separator = "-"
     if not openportslist:
         separator = ""
@@ -39,7 +52,8 @@ def whatisthere(subdomain,ip,target):
     ####
     pass
     
-def main():   
+
+def main():
     
     print """
 
@@ -48,32 +62,29 @@ def main():
      | __ / _` | / / || || |  / /| / _ \ '  \ 
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
-@kacperybczynski
-
 #Legend:
 {subdomain}: {subdomain ip} - {subdomain ip hostname} [subdomain ip open ports]
 
         """    
-
-    if len(sys.argv) > 1:
-        target = sys.argv[1]
-    else:
-        target = ''
-        print "\nPlease use e.g: python dnssubminer.py google.com\n"
-        sys.exit(0)
-
+    
+    parser = OptionParser(usage="usage: %prog domain.com [options]",version="%prog 1.0")
+    parser.add_option("-p", "--ports", type="string", default=False, dest="ports", help="type ports number to check")
+    parser.add_option("-w", "--wordlist", action="store", type="string", dest="filename", metavar="FILE", default="dictionary.txt", help="wordlist path")
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        parser.error("wrong number of arguments")
+    target = sys.argv[1]
     resolver = dns.resolver.Resolver(configure=False)
     #google dns & yandex dns public nameservers for balance in the galaxy
     resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
     print "\nSubdomain bruteforce results for " + target + ": \n"
-    with open('dictionary.txt') as fp:
+    with open(options.filename) as fp:
         for line in fp:
             chhost = line.rstrip() + '.' + target
             try:
                 answer = resolver.query(chhost, 'A')
                 for a in answer:
-                    whatisthere(chhost,str(a),target)
-
+                    whatisthere(chhost,str(a),target,options.ports)
             except dns.resolver.NXDOMAIN:
                 #print "No such domain %s" % chhost
                 pass
@@ -82,4 +93,6 @@ def main():
             except dns.exception.DNSException:
                 print "Unhandled exception subdomain: %s" % chhost
 
-main()
+    
+if __name__ == '__main__':
+    main()
