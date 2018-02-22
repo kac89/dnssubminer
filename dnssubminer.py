@@ -7,15 +7,11 @@ import sys
 
 def portcheck(ip,usescan):
     openports = []
-    
     ports = []
-    
     if usescan:
-        #print usescan
         new = usescan.split(",")
         for i in new:
             ports.append(int(i))
-
     for port in ports:
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -26,10 +22,8 @@ def portcheck(ip,usescan):
             s.close()
         except:
             pass
-        
     if not openports:
         openports = ""
-        
     return openports
 
 def lookup(addr):
