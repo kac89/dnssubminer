@@ -62,7 +62,7 @@ def main():
         """    
     
     parser = OptionParser(usage="usage: %prog domain.com [options]",version="%prog 1.0")
-    parser.add_option("-p", "--ports", type="string", default=False, dest="ports", help="type ports number to check")
+    parser.add_option("-p", "--ports", type="string", default=False, dest="ports", help="type ports number to check, format: 80,443,445")
     parser.add_option("-w", "--wordlist", action="store", type="string", dest="filename", metavar="FILE", default="dictionary.txt", help="wordlist path")
     (options, args) = parser.parse_args()
     if len(args) != 1:

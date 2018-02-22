@@ -41,7 +41,7 @@ Options:
   --version             show program's version number and exit
   -h, --help            show this help message and exit
   -p PORTS, --ports=PORTS
-                        type ports number to check
+                        type ports number to check, format: 80,443,445
   -w FILE, --wordlist=FILE
                         wordlist path
 ```
