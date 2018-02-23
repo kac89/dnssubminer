@@ -29,24 +29,95 @@ def portcheck(ip,usescan):
 def lookup(addr):
     try:
         return socket.gethostbyaddr(addr)
+    except socket.gaierror:
+        return "", "", ""
     except socket.herror:
-        return "", None, None
+        return "", "", ""
     
-def whatisthere(subdomain,ip,target,usescan):
-    hostname,alias,addresslist = lookup(ip)
-    openportslist = portcheck(ip,usescan)
-    separator = "-"
-    if not openportslist:
-        separator = ""
-    print str(subdomain) + ": " + str(ip) + " - " + str(hostname) + " " + str(openportslist)
-    #do results backup
+def backup(target,subdomain,a,hostname,add,openportslist):
     file = open("results/"+target+"_results.txt", "a+")
-    file.write(str(subdomain) + ": " + str(ip) + " - " + str(hostname) + " " + str(openportslist) + "\n")     
+    file.write(str(subdomain) + ": " + str(a) + " - " + str(hostname) +  str(add) + str(openportslist) + "\n")     
     file.close()
-    ####
-    pass
-    
 
+def dnscheck(subdomain,resolver,usescan):
+    #A Record
+    try:
+        a=""
+        hostname=""
+        openportslist=""
+        answer = resolver.query(subdomain, 'A')
+        for a in answer:
+            ip = str(a)
+            hostname,alias,addresslist = lookup(ip)
+            openportslist = portcheck(ip,usescan)
+    except dns.resolver.NXDOMAIN:
+        #print "No such domain %s" % subdomain
+        pass
+    except dns.resolver.Timeout:
+        print "Timed out while resolving %s" % subdomain
+    except dns.resolver.NoAnswer:
+        pass
+    except dns.exception.DNSException:
+        print "Unhandled exception subdomain: %s" % subdomain
+        pass    
+    #TXT Record
+    try:
+        txt=[]
+        answer = resolver.query(subdomain, 'TXT')
+        for rdata in answer:
+            for txt_string in rdata.strings:
+                txt.append(txt_string)
+    except dns.resolver.NoAnswer:
+        pass
+    except dns.exception.DNSException:
+        pass
+    #SPF Record
+    try:
+        spf=[]
+        answer = resolver.query(subdomain, 'SPF')
+        for rdata in answer:
+            for spf_string in rdata.strings:
+                spf.append(spf_string)
+    except dns.resolver.NoAnswer:
+        pass
+    except dns.exception.DNSException:
+        pass
+    #CNAME Record
+    try:
+        cn=""
+        answer = dns.resolver.query(subdomain, 'CNAME')
+        for rdata in answer:
+            cn=str(rdata.target)
+    except dns.resolver.NoAnswer:
+        pass
+    except dns.exception.DNSException:
+        pass              
+    return a,txt,spf,cn,hostname,openportslist
+
+def results(subdomain,resolver,usescan,target):
+    a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan)
+    if hostname == cn[:-1]:
+        cn = ""
+    add=" "
+    
+    if spf:
+        txt.append(spf)
+    
+    if cn and txt:
+        add = " (" + cn + "|" + str(txt) + ") "    
+    elif cn:
+        add = " (" + cn + ") "  
+    elif txt:
+        add = " (" + str(txt) + ") "          
+    else:
+        add=" "
+    if a or cn or txt:
+        print str(subdomain) + ": " + str(a) + " - " + str(hostname) +  str(add) + str(openportslist)
+        backup(target,subdomain,a,hostname,add,openportslist)
+
+    pass
+
+    
 def main():
     
     print """
@@ -57,7 +128,7 @@ def main():
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
 #Legend:
-{subdomain}: {subdomain ip} - {subdomain ip hostname} [subdomain ip open ports]
+{subdomain}: {subdomain ip} - {subdomain ip hostname} ({subdomain CNAME}|[{subdomain TXT/SPF}]) [subdomain ip open ports]
 
         """    
     
@@ -74,19 +145,7 @@ def main():
     print "\nSubdomain bruteforce results for " + target + ": \n"
     with open(options.filename) as fp:
         for line in fp:
-            chhost = line.rstrip() + '.' + target
-            try:
-                answer = resolver.query(chhost, 'A')
-                for a in answer:
-                    whatisthere(chhost,str(a),target,options.ports)
-            except dns.resolver.NXDOMAIN:
-                #print "No such domain %s" % chhost
-                pass
-            except dns.resolver.Timeout:
-                print "Timed out while resolving %s" % chhost
-            except dns.exception.DNSException:
-                print "Unhandled exception subdomain: %s" % chhost
+            results(line.rstrip()+'.'+target,dns.resolver,options.ports,target)
 
-    
 if __name__ == '__main__':
     main()
