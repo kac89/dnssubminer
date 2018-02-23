@@ -99,10 +99,8 @@ def results(subdomain,resolver,usescan,target):
     if hostname == cn[:-1]:
         cn = ""
     add=" "
-    
     if spf:
         txt.append(spf)
-    
     if cn and txt:
         add = " (" + cn + "|" + str(txt) + ") "    
     elif cn:
@@ -114,7 +112,6 @@ def results(subdomain,resolver,usescan,target):
     if a or cn or txt:
         print str(subdomain) + ": " + str(a) + " - " + str(hostname) +  str(add) + str(openportslist)
         backup(target,subdomain,a,hostname,add,openportslist)
-
     pass
 
     
