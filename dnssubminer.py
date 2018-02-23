@@ -34,9 +34,9 @@ def lookup(addr):
     except socket.herror:
         return "", "", ""
     
-def backup(target,subdomain,a,hostname,add,openportslist):
+def backup(target,subdomain,a,host,add,openportslist):
     file = open("results/"+target+"_results.txt", "a+")
-    file.write(str(subdomain) + ": " + str(a) + " - " + str(hostname) +  str(add) + str(openportslist) + "\n")     
+    file.write(str(subdomain) + ": " + str(a) + host +  str(add) + str(openportslist) + "\n")     
     file.close()
 
 def dnscheck(subdomain,resolver,usescan):
@@ -87,7 +87,7 @@ def dnscheck(subdomain,resolver,usescan):
         cn=""
         answer = dns.resolver.query(subdomain, 'CNAME')
         for rdata in answer:
-            cn=str(rdata.target)
+            cn=rdata.target
     except dns.resolver.NoAnswer:
         pass
     except dns.exception.DNSException:
@@ -102,16 +102,20 @@ def results(subdomain,resolver,usescan,target):
     if spf:
         txt.append(spf)
     if cn and txt:
-        add = " (" + cn + "|" + str(txt) + ") "    
+        add = " (" + str(cn) + "|" + str(txt) + ") "    
     elif cn:
-        add = " (" + cn + ") "  
+        add = " (" + str(cn) + ") "  
     elif txt:
         add = " (" + str(txt) + ") "          
     else:
         add=" "
+    host=""    
+    if hostname:
+        host = " - " + str(hostname)
+        
     if a or cn or txt:
-        print str(subdomain) + ": " + str(a) + " - " + str(hostname) +  str(add) + str(openportslist)
-        backup(target,subdomain,a,hostname,add,openportslist)
+        print str(subdomain) + ": " + str(a) + host + str(add) + str(openportslist)
+        backup(target,subdomain,a,host,add,openportslist)
     pass
 
     
