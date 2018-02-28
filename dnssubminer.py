@@ -96,25 +96,28 @@ def dnscheck(subdomain,resolver,usescan):
 
 def results(subdomain,resolver,usescan,target):
     a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan)
-    if hostname == cn[:-1]:
-        cn = ""
+    str1 = '.'.join(cn)
+    if hostname == str1[:-1]:
+        hostname = ""
     add=" "
+    add2=""
+    add2=str(a)
     if spf:
         txt.append(spf)
-    if cn and txt:
-        add = " (" + str(cn) + "|" + str(txt) + ") "    
-    elif cn:
-        add = " (" + str(cn) + ") "  
+    if cn and a:
+        add2 = "(" + str(cn) + ") " + str(a)
     elif txt:
-        add = " (" + str(txt) + ") "          
+        add = " (" + str(txt) + ") "        
+    elif a:
+        add2 = str(a)            
     else:
         add=" "
+        add2=""
     host=""    
     if hostname:
         host = " - " + str(hostname)
-        
     if a or cn or txt:
-        print str(subdomain) + ": " + str(a) + host + str(add) + str(openportslist)
+        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist)
         backup(target,subdomain,a,host,add,openportslist)
     pass
 
