@@ -132,7 +132,7 @@ def main():
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
 #Legend:
-{subdomain}: {subdomain ip} - {subdomain ip hostname} ({subdomain CNAME}|[{subdomain TXT/SPF}]) [subdomain ip open ports]
+{subdomain}: ({subdomain CNAME}) {subdomain ip} - {subdomain ip hostname} ([{subdomain TXT/SPF}]) [subdomain ip open ports]
 
         """    
     
