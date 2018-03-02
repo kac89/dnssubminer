@@ -33,6 +33,11 @@ Specify port scan and change default wordlist
 python dnssubminer.py domain.com -p 80,443,9200 -w /home/user/wordlist.txt
 ```
 
+Specify port scan, change default wordlist and nameservers
+```
+python dnssubminer.py domain.com -p 80,443,9200 -w /home/user/wordlist.txt -n 208.67.222.222,208.67.220.220
+```
+
 Options
 ```
 Usage: dnssubminer.py domain.com [options]

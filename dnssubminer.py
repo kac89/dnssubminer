@@ -34,9 +34,14 @@ def lookup(addr):
     except socket.herror:
         return "", "", ""
     
-def backup(target,subdomain,a,host,add,openportslist):
+def start_backup(intro,target):
     file = open("results/"+target+"_results.txt", "a+")
-    file.write(str(subdomain) + ": " + str(a) + host +  str(add) + str(openportslist) + "\n")     
+    file.write(str(intro) + "\n")     
+    file.close()
+    
+def backup(target,subdomain,add2,host,add,openportslist):
+    file = open("results/"+target+"_results.txt", "a+")
+    file.write(str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + "\n")     
     file.close()
 
 def dnscheck(subdomain,resolver,usescan):
@@ -118,7 +123,7 @@ def results(subdomain,resolver,usescan,target):
         host = " - " + str(hostname)
     if a or cn or txt:
         print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist)
-        backup(target,subdomain,a,host,add,openportslist)
+        backup(target,subdomain,add2,host,add,openportslist)
     pass
 
     
@@ -132,21 +137,32 @@ def main():
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
 #Legend:
-{subdomain}: ({subdomain CNAME}) {subdomain ip} - {subdomain ip hostname} ([{subdomain TXT/SPF}]) [subdomain ip open ports]
+{subdomain}: ({subdomain CN}) {CN/subdomain ip} - {subdomain ip hostname} ([{subdomain TXT/SPF}]) [subdomain ip open ports]
 
         """    
     
     parser = OptionParser(usage="usage: %prog domain.com [options]",version="%prog 1.0")
     parser.add_option("-p", "--ports", type="string", default=False, dest="ports", help="type ports number to check, format: 80,443,445")
+    parser.add_option("-n", "--nameservers", type="string", default=False, dest="ns", help="type your nameservers, format: 8.8.8.8,8.8.4.4")
     parser.add_option("-w", "--wordlist", action="store", type="string", dest="filename", metavar="FILE", default="dictionary.txt", help="wordlist path")
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("wrong number of arguments")
     target = sys.argv[1]
     resolver = dns.resolver.Resolver(configure=False)
-    #google dns & yandex dns public nameservers for balance in the galaxy
-    resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
-    print "\nSubdomain bruteforce results for " + target + ": \n"
+    #default google dns & yandex dns public nameservers for balance in the galaxy
+    nameservers = []
+    if options.ns:
+        new = options.ns.split(",")
+        for i in new:
+            nameservers.append(str(i))
+        resolver.nameservers = nameservers
+    else:
+        resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
+        nameservers = resolver.nameservers
+    intro = "\n[+] Subdomain bruteforce results for " + target + " using DNS: "+str(nameservers)+": \n"
+    start_backup(intro,target)
+    print intro
     with open(options.filename) as fp:
         for line in fp:
             results(line.rstrip()+'.'+target,dns.resolver,options.ports,target)
