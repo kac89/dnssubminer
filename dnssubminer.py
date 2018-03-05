@@ -2,6 +2,7 @@
 
 from optparse import OptionParser
 import dns.resolver
+import pygeoip
 import socket
 import sys
 
@@ -44,6 +45,16 @@ def backup(target,subdomain,add2,host,add,openportslist):
     file.write(str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + "\n")     
     file.close()
 
+def asnlookup(ip):
+    try:
+        gi = pygeoip.GeoIP('GeoIPASNum.dat')
+        gi2 = pygeoip.GeoIP('GeoIP.dat')
+        asn = gi.asn_by_name(ip)
+        loc = gi2.country_name_by_name(ip)
+        return "- "+str(loc) + ": " + str(asn)
+    except:
+        pass
+        return ""
 def dnscheck(subdomain,resolver,usescan):
     #A Record
     try:
@@ -122,7 +133,7 @@ def results(subdomain,resolver,usescan,target):
     if hostname:
         host = " - " + str(hostname)
     if a or cn or txt:
-        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist)
+        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asnlookup(subdomain))
         backup(target,subdomain,add2,host,add,openportslist)
     pass
 
