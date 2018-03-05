@@ -15,7 +15,7 @@ OSX:
 git clone https://github.com/rthalley/dnspython
 # install the library
 cd dnspython/
-python setup.py install
+sudo python setup.py install
 
 #for pygeoip
 # clone repository
