@@ -20,7 +20,6 @@ sudo python setup.py install
 #for pygeoip
 # clone repository
 git clone https://github.com/appliedsec/pygeoip
- 
 # install the library
 cd pygeoip
 sudo python setup.py install
