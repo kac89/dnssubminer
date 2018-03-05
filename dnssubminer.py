@@ -63,7 +63,7 @@ def dnscheck(subdomain,resolver,usescan):
     except dns.resolver.NoAnswer:
         pass
     except dns.exception.DNSException:
-        print "Unhandled exception subdomain: %s" % subdomain
+        #print "Unhandled exception subdomain: %s" % subdomain
         pass    
     #TXT Record
     try:
