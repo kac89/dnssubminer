@@ -2,19 +2,35 @@
 Python DNS (http://www.dnspython.org/) resolver subdomain, brute force miner base on dictionary.
 
 ## Installation
-**Requires python module http://www.dnspython.org/**
+**Requires python module http://www.dnspython.org/ and pygeoip**
+
+This product includes GeoLite data created by MaxMind, available from 
+<a href="http://www.maxmind.com">http://www.maxmind.com</a>.
 
 OSX:
 
 ```
+#for dnspython
+# clone repository
 git clone https://github.com/rthalley/dnspython
+# install the library
 cd dnspython/
 python setup.py install
+
+#for pygeoip
+# clone repository
+git clone https://github.com/appliedsec/pygeoip
+ 
+# install the library
+cd pygeoip
+sudo python setup.py install
+
 ```
 
 Other:
 ```
 pip install dnspython
+pip install pygeoip
 ```
 
 ## How to run?
