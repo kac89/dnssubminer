@@ -40,9 +40,9 @@ def start_backup(intro,target):
     file.write(str(intro) + "\n")     
     file.close()
     
-def backup(target,subdomain,add2,host,add,openportslist):
+def backup(target,subdomain,add2,host,add,openportslist,asn):
     file = open("results/"+target+"_results.txt", "a+")
-    file.write(str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + "\n")     
+    file.write(str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asn) + "\n")     
     file.close()
 
 def asnlookup(ip):
@@ -117,6 +117,7 @@ def results(subdomain,resolver,usescan,target):
         hostname = ""
     add=" "
     add2=""
+    asn = asnlookup(subdomain)
     add2=str(a)
     if spf:
         txt.append(spf)
@@ -133,8 +134,8 @@ def results(subdomain,resolver,usescan,target):
     if hostname:
         host = " - " + str(hostname)
     if a or cn or txt:
-        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asnlookup(subdomain))
-        backup(target,subdomain,add2,host,add,openportslist)
+        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asn)
+        backup(target,subdomain,add2,host,add,openportslist,asn)
     pass
 
     
