@@ -55,7 +55,7 @@ def asnlookup(ip):
     except:
         pass
         return ""
-def dnscheck(subdomain,resolver,usescan,nameservers):
+def dnscheck(subdomain,resolver,usescan,nameservers,tcp):
     
     resolver = dns.resolver.Resolver(configure=False)
     resolver.nameservers = nameservers
@@ -65,7 +65,7 @@ def dnscheck(subdomain,resolver,usescan,nameservers):
         a=""
         hostname=""
         openportslist=""
-        answer = resolver.query(subdomain, 'A')
+        answer = resolver.query(subdomain, 'A',1,tcp)
         for a in answer:
             ip = str(a)
             hostname,alias,addresslist = lookup(ip)
@@ -83,7 +83,7 @@ def dnscheck(subdomain,resolver,usescan,nameservers):
     #TXT Record
     try:
         txt=[]
-        answer = resolver.query(subdomain, 'TXT')
+        answer = resolver.query(subdomain, 'TXT',1,tcp)
         for rdata in answer:
             for txt_string in rdata.strings:
                 txt.append(txt_string)
@@ -94,7 +94,7 @@ def dnscheck(subdomain,resolver,usescan,nameservers):
     #SPF Record
     try:
         spf=[]
-        answer = resolver.query(subdomain, 'SPF')
+        answer = resolver.query(subdomain, 'SPF',1,tcp)
         for rdata in answer:
             for spf_string in rdata.strings:
                 spf.append(spf_string)
@@ -105,7 +105,7 @@ def dnscheck(subdomain,resolver,usescan,nameservers):
     #CNAME Record
     try:
         cn=""
-        answer = dns.resolver.query(subdomain, 'CNAME')
+        answer = dns.resolver.query(subdomain, 'CNAME',1,tcp)
         for rdata in answer:
             cn=rdata.target
     except dns.resolver.NoAnswer:
@@ -114,8 +114,8 @@ def dnscheck(subdomain,resolver,usescan,nameservers):
         pass              
     return a,txt,spf,cn,hostname,openportslist
 
-def results(subdomain,resolver,usescan,target,nameservers):
-    a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan,nameservers)
+def results(subdomain,resolver,usescan,target,nameservers,tcp):
+    a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan,nameservers,tcp)
     str1 = '.'.join(cn)
     if hostname == str1[:-1]:
         hostname = ""
@@ -161,6 +161,7 @@ def main():
     parser.add_option("-p", "--ports", type="string", default=False, dest="ports", help="type ports number to check, format: 80,443,445")
     parser.add_option("-n", "--nameservers", type="string", default=False, dest="ns", help="type your nameservers, format: 8.8.8.8,8.8.4.4")
     parser.add_option("-w", "--wordlist", action="store", type="string", dest="filename", metavar="FILE", default="dictionary.txt", help="wordlist path")
+    parser.add_option('--tcpdns', help='use only tcp protocol for resolver', dest='tcp', default=False,action='store_true')
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("wrong number of arguments")
@@ -179,7 +180,7 @@ def main():
     print intro
     with open(options.filename) as fp:
         for line in fp:
-            results(line.rstrip()+'.'+target,dns.resolver,options.ports,target,nameservers)
+            results(line.rstrip()+'.'+target,dns.resolver,options.ports,target,nameservers,options.tcp)
 
 if __name__ == '__main__':
     main()
