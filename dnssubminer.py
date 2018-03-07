@@ -55,7 +55,11 @@ def asnlookup(ip):
     except:
         pass
         return ""
-def dnscheck(subdomain,resolver,usescan):
+def dnscheck(subdomain,resolver,usescan,nameservers):
+    
+    resolver = dns.resolver.Resolver(configure=False)
+    resolver.nameservers = nameservers
+
     #A Record
     try:
         a=""
@@ -70,7 +74,7 @@ def dnscheck(subdomain,resolver,usescan):
         #print "No such domain %s" % subdomain
         pass
     except dns.resolver.Timeout:
-        print "Timed out while resolving %s" % subdomain
+        print "Timed out while resolving %s, is DNS server works?" % subdomain
     except dns.resolver.NoAnswer:
         pass
     except dns.exception.DNSException:
@@ -110,8 +114,8 @@ def dnscheck(subdomain,resolver,usescan):
         pass              
     return a,txt,spf,cn,hostname,openportslist
 
-def results(subdomain,resolver,usescan,target):
-    a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan)
+def results(subdomain,resolver,usescan,target,nameservers):
+    a,txt,spf,cn,hostname,openportslist = dnscheck(subdomain,resolver,usescan,nameservers)
     str1 = '.'.join(cn)
     if hostname == str1[:-1]:
         hostname = ""
@@ -161,23 +165,21 @@ def main():
     if len(args) != 1:
         parser.error("wrong number of arguments")
     target = sys.argv[1]
-    resolver = dns.resolver.Resolver(configure=False)
-    #default google dns & yandex dns public nameservers for balance in the galaxy
     nameservers = []
     if options.ns:
         new = options.ns.split(",")
         for i in new:
             nameservers.append(str(i))
-        resolver.nameservers = nameservers
     else:
-        resolver.nameservers = ['8.8.8.8','77.88.8.8','8.8.4.4','77.88.8.1']
-        nameservers = resolver.nameservers
+        #default google dns
+        nameservers = ['8.8.8.8','8.8.4.4']
+        pass
     intro = "\n[+] Subdomain bruteforce results for " + target + " using DNS: "+str(nameservers)+": \n"
     start_backup(intro,target)
     print intro
     with open(options.filename) as fp:
         for line in fp:
-            results(line.rstrip()+'.'+target,dns.resolver,options.ports,target)
+            results(line.rstrip()+'.'+target,dns.resolver,options.ports,target,nameservers)
 
 if __name__ == '__main__':
     main()
