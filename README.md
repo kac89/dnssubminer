@@ -62,6 +62,9 @@ Options:
   -h, --help            show this help message and exit
   -p PORTS, --ports=PORTS
                         type ports number to check, format: 80,443,445
+  -n NS, --nameservers=NS
+                        type your nameservers, format: 8.8.8.8,8.8.4.4
   -w FILE, --wordlist=FILE
                         wordlist path
+  --tcpdns              use only tcp protocol for resolver
 ```
