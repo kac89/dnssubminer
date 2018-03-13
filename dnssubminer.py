@@ -5,6 +5,7 @@ import dns.resolver
 import pygeoip
 import socket
 import sys
+import requests, json, re, os
 
 def portcheck(ip,usescan):
     openports = []
@@ -40,9 +41,9 @@ def start_backup(intro,target):
     file.write(str(intro) + "\n")     
     file.close()
     
-def backup(target,subdomain,add2,host,add,openportslist,asn):
+def backup(target,subdomain,add2,host,add,asn,openportslist):
     file = open("results/"+target+"_results.txt", "a+")
-    file.write(str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asn) + "\n")     
+    file.write(str(subdomain) + ": " + add2 + host + str(add) + str(asn) + str(openportslist) + "\n")     
     file.close()
 
 def asnlookup(ip):
@@ -51,7 +52,7 @@ def asnlookup(ip):
         gi2 = pygeoip.GeoIP('GeoIP.dat')
         asn = gi.asn_by_name(ip)
         loc = gi2.country_name_by_name(ip)
-        return "- "+str(loc) + ": " + str(asn)
+        return "- "+str(loc) + ": " + str(asn) + " "
     except:
         pass
         return ""
@@ -138,10 +139,68 @@ def results(subdomain,resolver,usescan,target,nameservers,tcp):
     if hostname:
         host = " - " + str(hostname)
     if a or cn or txt:
-        print str(subdomain) + ": " + add2 + host + str(add) + str(openportslist) + str(asn)
-        backup(target,subdomain,add2,host,add,openportslist,asn)
+        print str(subdomain) + ": " + add2 + host + str(add) + str(asn) + str(openportslist)
+        backup(target,subdomain,add2,host,add,asn,openportslist)
     pass
 
+
+def search_crt(domain, wildcard=True):
+        base_url = "https://crt.sh/?q={}&output=json"
+        if wildcard:
+            domain = "%25.{}".format(domain)
+        url = base_url.format(domain)
+        req = requests.get(url, headers={'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'})
+        if req.ok:
+            try:
+                content = req.content
+                data = json.loads("[{}]".format(content.replace('}{', '},{')))
+                output = set()
+                for x in data:
+                    i = x['name_value']
+                    i=i.lower()
+                    i = re.sub('[!@#$*]', '', i)
+                    if i[0]==".":
+                        i = i[1:]
+                    output.add(i)
+                return output
+            except Exception as err:
+                print("Error retrieving information." + err)
+                pass
+
+def search_vt(domain,vtpath):
+    with open (vtpath, "r") as myfile:
+        data = myfile.readlines()
+        for line in data:
+            apikey=line.rstrip()
+    params = {'domain': domain, 'apikey': apikey}
+    headers = {"Accept-Encoding": "gzip, deflate","User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36"}
+    response = requests.get('https://www.virustotal.com/vtapi/v2/domain/report', params=params, headers=headers)
+    if response.ok:
+        try:
+            output = set()
+            response_json = response.json()
+            for x in response_json["subdomains"]:
+                output.add(x)
+            return output
+        except Exception as err:
+            print("Error retrieving information.")
+            pass
+
+def get_online_subdomains(domain):
+    crt = search_crt(domain)
+    cwd = os.getcwd()
+    fname = "/virustotal.txt"
+    vtpath=cwd+fname
+    vt=""
+    if os.path.isfile(vtpath):
+        vt = search_vt(domain,vtpath)
+    mergedlist = []
+    if crt:
+        mergedlist.extend(crt)
+    if vt:
+        mergedlist.extend(vt)
+    mergedlist = list(set(mergedlist))
+    return mergedlist
     
 def main():
     
@@ -153,7 +212,7 @@ def main():
      |_||_\__,_|_\_\\_,_|/ | /___|_\___/_|_|_|
                        |__/                   
 #Legend:
-{subdomain}: ({subdomain CN}) {CN/subdomain ip} - {subdomain ip hostname} ([{subdomain TXT/SPF}]) [subdomain ip open ports] {GEOIP/ASN}
+{subdomain}: ({subdomain CN}) {CN/subdomain ip} - {subdomain ip hostname} ([{subdomain TXT/SPF}]) {GEOIP/ASN} [subdomain ip open ports]
 
         """    
     
@@ -162,6 +221,7 @@ def main():
     parser.add_option("-n", "--nameservers", type="string", default=False, dest="ns", help="type your nameservers, format: 8.8.8.8,8.8.4.4")
     parser.add_option("-w", "--wordlist", action="store", type="string", dest="filename", metavar="FILE", default="dictionary.txt", help="wordlist path")
     parser.add_option('--tcpdns', help='use only tcp protocol for resolver', dest='tcp', default=False,action='store_true')
+    parser.add_option('--online', help='get online info about target from crt.sh and virustotal (virustotal.txt api key storage)', dest='online', default=False,action='store_true')
     (options, args) = parser.parse_args()
     if len(args) != 1:
         parser.error("wrong number of arguments")
@@ -175,6 +235,14 @@ def main():
         #default google dns
         nameservers = ['8.8.8.8','8.8.4.4']
         pass
+    
+    if options.online:
+        print "[+] Get online information about subdomains... "
+        fp = get_online_subdomains(target)
+        print "[+] Scan online fetched subdomains using DNS: "+str(nameservers)+": "
+        for line in fp:
+            results(str(line),dns.resolver,options.ports,target,nameservers,options.tcp)
+            
     intro = "\n[+] Subdomain bruteforce results for " + target + " using DNS: "+str(nameservers)+": \n"
     start_backup(intro,target)
     print intro

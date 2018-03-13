@@ -2,11 +2,12 @@
 Python DNS (http://www.dnspython.org/) resolver subdomain, brute force miner base on dictionary.
 
 ## Installation
-**Requires python module http://www.dnspython.org/ and pygeoip**
+**Requires python module http://www.dnspython.org/ and pygeoip, requests**
 
 This product includes GeoLite data created by MaxMind, available from 
 <a href="http://www.maxmind.com">http://www.maxmind.com</a>.
 
+Install the dependencies.
 OSX:
 
 ```
@@ -24,12 +25,16 @@ git clone https://github.com/appliedsec/pygeoip
 cd pygeoip
 sudo python setup.py install
 
+Or use alternative: 
+easy_install dnspython
+easy_install pygeoip
+easy_install requests
+
 ```
 
-Other:
+Others
 ```
-pip install dnspython
-pip install pygeoip
+pip install -r requirements.txt
 ```
 
 ## How to run?
@@ -41,6 +46,11 @@ python dnssubminer.py domain.com
 Specify port scan
 ```
 python dnssubminer.py domain.com -p 80,443,9200
+```
+
+Get online subdomains list and specify port scan, change default wordlist and nameservers
+```
+python dnssubminer.py domain.com -p 80,443,9200 -w /home/user/wordlist.txt -n 208.67.222.222,208.67.220.220 --online
 ```
 
 Specify port scan and change default wordlist
@@ -67,4 +77,6 @@ Options:
   -w FILE, --wordlist=FILE
                         wordlist path
   --tcpdns              use only tcp protocol for resolver
+  --online              get online info about target from crt.sh and
+                        virustotal (virustotal.txt api key storage)
 ```
