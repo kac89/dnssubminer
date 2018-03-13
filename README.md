@@ -37,6 +37,13 @@ Others
 pip install -r requirements.txt
 ```
 
+## How to use VirusTotal?
+
+In dnssubminer directory create virustotal.txt file containing the api key.
+```
+echo "API_KEY" >> virustotal.txt
+```
+
 ## How to run?
 
 ```
